@@ -29,8 +29,6 @@ Thumbs.db
 *.tlog
 *.opensdf
 [Bb]in/
-[Dd]eploy
-[Tt]est[Ii]mages
 [Dd]ebug*/
 *.lib
 *.sbr
