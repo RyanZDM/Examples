@@ -28,7 +28,7 @@ Thumbs.db
 *.log
 *.tlog
 *.opensdf
-[Bb]in/*
+bin/*
 [Dd]eploy
 [Tt]est[Ii]mages
 [Dd]ebug*/*
