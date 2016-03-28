@@ -1,7 +1,7 @@
-GetProcessInfo/*
-MassTransitTest/*
-MQTest/*
-MvcTest1/*
+GetProcessInfo/
+MassTransitTest/
+MQTest/
+MvcTest1/
 
 # Ignore Windows Thumbnails
 Thumbs.db
@@ -28,16 +28,16 @@ Thumbs.db
 *.log
 *.tlog
 *.opensdf
-bin/*
+[Bb]in/
 [Dd]eploy
 [Tt]est[Ii]mages
-[Dd]ebug*/*
+[Dd]ebug*/
 *.lib
 *.sbr
 obj/
-[Rr]elease*/*
+[Rr]elease*/
 *.sdf
-ipch/*
+ipch/
 
 # Ignore Local ReSharper Files
 _ReSharper*/
