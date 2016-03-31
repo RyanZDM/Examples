@@ -1,23 +1,22 @@
-﻿#define _USE_NLOG_
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using log4net;
 using Topshelf.Logging;
+
+// TODO: Define or un-define "_USE_NLOG_" in project settings for using NLog or Log4Net
 #if _USE_NLOG_
 using NLog;
+using LogManager = NLog.LogManager;
+
 #else
 using log4net;
+
 #endif
 
 using Topshelf;
-using LogManager = NLog.LogManager;
 
 namespace ServiceTest
 {
@@ -141,7 +140,7 @@ namespace ServiceTest
 				#endregion
 
 				#region Get environment settings of logged on user
-				var environmentBlock = IntPtr.Zero;
+				IntPtr environmentBlock;
 				if (!NativeMethods.CreateEnvironmentBlock(out environmentBlock, token, false))
 					throw new Exception(string.Format("CreateEnvironmentBlock failed with error code:{0}", Marshal.GetLastWin32Error()));
 

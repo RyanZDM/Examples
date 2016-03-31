@@ -1,10 +1,8 @@
-﻿#define _USE_NLOG_
-
-using Topshelf;
+﻿using Topshelf;
 
 namespace ServiceTest
 {
-	class Program
+	public static class Program
 	{
 		static void Main(string[] args)
 		{
