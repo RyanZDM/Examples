@@ -1,11 +1,14 @@
 ﻿#define _USE_NLOG_
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
 using Topshelf.Logging;
 #if _USE_NLOG_
 using NLog;
@@ -14,6 +17,7 @@ using log4net;
 #endif
 
 using Topshelf;
+using LogManager = NLog.LogManager;
 
 namespace ServiceTest
 {
@@ -53,7 +57,7 @@ namespace ServiceTest
 				Thread.Sleep(5000);
 				LaunchProgramInSession(2, @"C:\Windows\System32\notepad.exe");
 			});
-			
+
 			//LaunchProgramInSession(2, @"C:\Windows\System32\notepad.exe");
 
 			return true;
@@ -98,26 +102,25 @@ namespace ServiceTest
 			}
 		}
 
-		public void LaunchProgramInSession(int sessionId, string program)
+		public static void LaunchProgramInSession(int sessionId, string program)
 		{
 			var processes = Process.GetProcessesByName("explorer");
+			if (processes.Length < 1)
+				processes = Process.GetProcesses();		// Get all processes no matter what session they belong to
+
 			var explorer = processes.FirstOrDefault(p => p.SessionId == sessionId);
 			if (explorer == null)
-			{
-				logger.Warn("Not found the explorer.exe process in session {0}", sessionId);
-				return;
-			}
+				throw new Exception(string.Format("Not found the explorer.exe process in session {0}", sessionId));
 			
 			var token = IntPtr.Zero;
 			try
 			{
+				#region Get logged on user's primary token
 				if (!NativeMethods.OpenProcessToken(processes[0].Handle,
 													NativeMethods.TOKEN_READ | NativeMethods.TOKEN_ASSIGN_PRIMARY,
 													out token))
-				{
-					logger.Warn("OpenProcessToken failed.");
-					return;
-				}
+					throw new Exception(string.Format("OpenProcessToken failed."));
+				#endregion
 
 				#region codes for calling API DuplicateTokenEx
 
@@ -137,6 +140,32 @@ namespace ServiceTest
 
 				#endregion
 
+				#region Get environment settings of logged on user
+				var environmentBlock = IntPtr.Zero;
+				if (!NativeMethods.CreateEnvironmentBlock(out environmentBlock, token, false))
+					throw new Exception(string.Format("CreateEnvironmentBlock failed with error code:{0}", Marshal.GetLastWin32Error()));
+
+				/*
+				// Convert to string
+				var offset = 0;
+				var userEnvironments = new Dictionary<string, string>();
+				while (true)
+				{
+					var ptr = new IntPtr(environmentBlock.ToInt64() + offset);
+					var envVar = Marshal.PtrToStringUni(ptr);
+					offset += Encoding.Unicode.GetByteCount(envVar) + 2;
+					if (string.IsNullOrEmpty(envVar))
+						break;
+
+					var valuePair = envVar.Split(new string[] {"="}, StringSplitOptions.RemoveEmptyEntries);
+					if (valuePair.Length > 1 && !string.IsNullOrWhiteSpace(valuePair[0]))
+					{
+						userEnvironments[valuePair[0]] = valuePair[1];
+					}
+				}*/
+				#endregion
+
+				#region Launch the program as logged on user in target session
 				var si = new STARTUPINFOW();
 				si.cb = (uint) Marshal.SizeOf(si);
 				si.lpDesktop = @"winsta0\default";
@@ -148,8 +177,8 @@ namespace ServiceTest
 																 IntPtr.Zero,
 																 IntPtr.Zero,
 																 false,
-																 NativeMethods.NORMAL_PRIORITY_CLASS,
-																 IntPtr.Zero, // TODO if need to create environment of target logged on user
+																 NativeMethods.NORMAL_PRIORITY_CLASS | NativeMethods.CREATE_UNICODE_ENVIRONMENT,
+																 environmentBlock, // */IntPtr.Zero, // Null if not need environment of logged on user
 																 null,
 																 ref si,
 																 out pi);
@@ -160,9 +189,9 @@ namespace ServiceTest
 				}
 				else
 				{
-					var errorCode = Marshal.GetLastWin32Error();
-					logger.Warn("CreateProcessAsUserW failed with error code:{0}", errorCode);
+					throw new Exception(string.Format("CreateProcessAsUserW failed with error code:{0}", Marshal.GetLastWin32Error()));
 				}
+				#endregion
 			}
 			finally
 			{
