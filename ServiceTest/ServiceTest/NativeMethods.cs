@@ -158,13 +158,9 @@ namespace ServiceTest
 												   TOKEN_TYPE TokenType,
 												   out IntPtr phNewToken);
 
-
 		/// Return Type: DWORD->unsigned int
-		///hHandle: HANDLE->void*
-		///dwMilliseconds: DWORD->unsigned int
-		[DllImport("kernel32.dll", EntryPoint = "WaitForSingleObject")]
-		public static extern uint WaitForSingleObject([In] IntPtr hHandle, uint dwMilliseconds);
-		
+		[DllImport("kernel32.dll", EntryPoint = "WTSGetActiveConsoleSessionId")]
+		public static extern uint WTSGetActiveConsoleSessionId();
 	}
 
 

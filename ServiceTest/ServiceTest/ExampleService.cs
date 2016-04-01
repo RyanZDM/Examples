@@ -54,7 +54,8 @@ namespace ServiceTest
 			Task.Run(() =>
 			{
 				Thread.Sleep(5000);
-				LaunchProgramInSession(2, @"C:\Windows\System32\notepad.exe");
+				//LaunchProgramInSession(2, @"C:\Windows\System32\notepad.exe");
+				LaunchProgramInLoggedOnSession(@"C:\Windows\System32\notepad.exe");
 			});
 
 			//LaunchProgramInSession(2, @"C:\Windows\System32\notepad.exe");
@@ -97,25 +98,57 @@ namespace ServiceTest
 			// Launch the specified program once user logged on Windows
 			if (args.ReasonCode == SessionChangeReasonCode.SessionLogon)
 			{
-				LaunchProgramInSession(args.SessionId, @"C:\Windows\System32\notepad.exe");
+				const string program = @"C:\Windows\System32\notepad.exe";
+				try
+				{
+					LaunchProgramInSession(args.SessionId, program);
+				}
+				catch (Exception ex)
+				{
+					logger.Error("Failed to launch program '{0}' in seesion {1}, error='{2}'", program, args.SessionId, ex);
+				}
 			}
 		}
 
+		/// <summary>
+		/// Launch program in current active interactive session
+		/// </summary>
+		/// <param name="program">The program to be launched</param>
+		public static void LaunchProgramInLoggedOnSession(string program)
+		{
+			LaunchProgramInSession((int)NativeMethods.WTSGetActiveConsoleSessionId(), program);
+		}
+
+		/// <summary>
+		/// Launch the program in specified session
+		/// </summary>
+		/// <param name="sessionId">The ID of session the program to be launched</param>
+		/// <param name="program">The program to be launched</param>
 		public static void LaunchProgramInSession(int sessionId, string program)
 		{
 			var processes = Process.GetProcessesByName("explorer");
 			if (processes.Length < 1)
 				processes = Process.GetProcesses();		// Get all processes no matter what session they belong to
 
-			var explorer = processes.FirstOrDefault(p => p.SessionId == sessionId);
-			if (explorer == null)
-				throw new Exception(string.Format("Not found the explorer.exe process in session {0}", sessionId));
+			var targetProcess = processes.FirstOrDefault(p => p.SessionId == sessionId);
+			if (targetProcess == null)
+				throw new Exception(string.Format("Not found process in session {0}", sessionId));
 			
+			LaunchProgramAsUser(targetProcess, program);
+		}
+
+		/// <summary>
+		/// Launch the program as the same user of target process in the same session target process belong to
+		/// </summary>
+		/// <param name="targetProcess">The process's user and session will be used for launching program</param>
+		/// <param name="program">Program to be launched</param>
+		public static void LaunchProgramAsUser(Process targetProcess, string program)
+		{
 			var token = IntPtr.Zero;
 			try
 			{
 				#region Get logged on user's primary token
-				if (!NativeMethods.OpenProcessToken(processes[0].Handle,
+				if (!NativeMethods.OpenProcessToken(targetProcess.Handle,
 													NativeMethods.TOKEN_READ | NativeMethods.TOKEN_ASSIGN_PRIMARY,
 													out token))
 					throw new Exception(string.Format("OpenProcessToken failed."));
