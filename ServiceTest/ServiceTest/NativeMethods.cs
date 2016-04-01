@@ -162,9 +162,7 @@ namespace ServiceTest
 		[DllImport("kernel32.dll", EntryPoint = "WTSGetActiveConsoleSessionId")]
 		public static extern uint WTSGetActiveConsoleSessionId();
 	}
-
-
-
+	
 	[StructLayoutAttribute(LayoutKind.Sequential)]
 	public struct SECURITY_ATTRIBUTES
 	{

@@ -1,0 +1,18 @@
+// XRSDaemon.idl : IDL source for XRSDaemon
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (XRSDaemon.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	uuid(96CE551D-9152-475E-B474-58AEF9E9ADF2),
+	version(1.0),
+]
+library XRSDaemonLib
+{
+	importlib("stdole2.tlb");
+};
+
