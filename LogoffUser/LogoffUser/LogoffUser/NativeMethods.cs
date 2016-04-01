@@ -7,13 +7,13 @@ using System.Runtime.InteropServices;
 
 namespace LogoffUser
 {
-	class NativeMethods
+	public static class NativeMethods
 	{
 		/// <summary>
 		/// Log off all user session if its state is WTSActive
 		/// </summary>
 		/// <returns></returns>
-		internal static int LogoffSession()
+		public static int LogoffSession()
 		{
 			var loggedOff = 0;
 			var serverPtr = WTSOpenServer(Environment.MachineName);
