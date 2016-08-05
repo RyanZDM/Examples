@@ -20,6 +20,10 @@ using Topshelf;
 
 namespace ServiceTest
 {
+	/// <summary>
+	/// This example demos how to create a Windows service via Topshelf and response when user session changed
+	/// Also demos how to use NLog and Log4Net
+	/// </summary>
 	public class ExampleService
 	{
 		#region Private variables
