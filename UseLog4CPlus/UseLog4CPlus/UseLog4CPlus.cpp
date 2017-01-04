@@ -1,6 +1,8 @@
 // UseLog4CPlus.cpp : Defines the entry point for the console application.
 //
 
+// Note: Need to include the path to "log4cplus" in the "VC++ Directories->Include Directories" first
+
 #include "stdafx.h"
 #include "log4cplus/logger.h"
 #include "log4cplus/loggingmacros.h"

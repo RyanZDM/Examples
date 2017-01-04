@@ -46,3 +46,4 @@ InstallUtil.InstallLog
 *.orig
 
 *.VC.db
+*.VC.VC.opendb
