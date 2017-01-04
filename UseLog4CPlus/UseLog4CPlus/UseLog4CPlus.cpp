@@ -9,11 +9,21 @@
 #include "log4cplus/configurator.h"
 #include "log4cplus/initializer.h"
 
+// Note: Need to include the path ("../Common/log4cplus") in the "Linker -> General -> Additional Library Directories"
 #ifdef _DEBUG
-	#pragma comment(lib, "log4cplus/log4cplusD.lib")
+	#ifdef _UNICODE
+		#pragma comment(lib, "log4cplusUD.lib")
+	#else
+		#pragma comment(lib, "log4cplusD.lib")
+	#endif	// _UNICODE
 #else
-	#pragma comment(lib, "log4cplus/log4cplus.lib")
+	#ifdef _UNICODE
+		#pragma comment(lib, "log4cplusU.lib")
+	#else
+		#pragma comment(lib, "log4cplus.lib")
+	#endif	// _UNICODE
 #endif // _DEBUG
+
 
 
 int main()
